@@ -10,7 +10,7 @@ export async function recursiveFileSearch(
 
 	for (const file of files) {
 		if (file.isFile() && fileTypes.includes(getFileExtType(file.name))) {
-			validFiles.push(file.name);
+			validFiles.push(`${file.parentPath}/${file.name}`);
 		}
 
 		if (file.isDirectory()) {
