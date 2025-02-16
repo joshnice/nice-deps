@@ -3,16 +3,17 @@ import { isPackageJson } from "./types/package-json-type";
 
 const packageJSONName = "package.json";
 
-export async function findPacakgeJson() {
-	const files = await readdir("./");
+export async function getPacakgeJson(path: string) {
+	const files = await readdir(`./${path}`);
+
 	const packjsonFile = files.find((file) => file === packageJSONName);
 
 	if (packjsonFile == null) {
-		console.info("Package json can't be found");
+		console.info(`Package json can't be found for path ${path}`);
 		return null;
 	}
 
-	const packageJSONFile = await readFile(`./${packageJSONName}`, {
+	const packageJSONFile = await readFile(`${path}${packageJSONName}`, {
 		encoding: "utf8",
 	});
 
