@@ -1,5 +1,9 @@
 import { readFile } from "node:fs/promises";
 
+/**
+ * Need to handle the following:
+ * - import * as Sentry from "@sentry/react";
+ */
 export async function getFileImports(filePath: string) {
 	const file = await readFile(filePath, { encoding: "utf8" });
 	const spiltFile = file.split(/\r?\n/);

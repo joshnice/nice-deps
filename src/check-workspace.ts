@@ -1,4 +1,5 @@
 import { readdir } from "node:fs/promises";
+import { generatePackageNames } from "./generate-package-names";
 import { getFileImports } from "./get-file-imports";
 import { getPacakgeJson } from "./get-package-json";
 import { recursiveFileSearch } from "./node-helpers/recursive-file-search";
@@ -18,9 +19,9 @@ export async function checkWorkspaceDeps(workspacePath: string) {
 		);
 	}
 
-	const allDeps = [
-		Object.keys(dependencies ?? {}),
-		Object.keys(devDependencies ?? {}),
+	const packageJsonDeps = [
+		...Object.keys(dependencies ?? {}),
+		...Object.keys(devDependencies ?? {}),
 	];
 
 	const validFiles = await recursiveFileSearch(
@@ -29,8 +30,26 @@ export async function checkWorkspaceDeps(workspacePath: string) {
 		["node_modules", "dist", ".wrangler"],
 	);
 
+	const usedPackages: string[] = [];
+
 	for (const file of validFiles) {
 		const importedPackages = await getFileImports(file);
-		console.log("file", file, importedPackages);
+		// biome-ignore lint/complexity/noForEach: <explanation>
+		importedPackages.forEach((packageName) => {
+			if (!usedPackages.includes(packageName)) {
+				usedPackages.push(packageName);
+			}
+		});
 	}
+
+	const missingPackages = packageJsonDeps.filter(
+		(packageJsonDep) =>
+			!usedPackages.some((usedPackage) =>
+				generatePackageNames(usedPackage).some(
+					(name) => name === packageJsonDep,
+				),
+			),
+	);
+
+	console.log(name, missingPackages);
 }
