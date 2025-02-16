@@ -1,3 +1,4 @@
+import { readdir } from "node:fs/promises";
 import { checkWorkspaceDeps } from "./src/check-workspace";
 import { getPacakgeJson } from "./src/get-package-json";
 
@@ -19,15 +20,26 @@ export async function main() {
 
 		for (const workspace of workspacePaths) {
 			const spiltWorkspacePath = workspace.split("/");
-			if (spiltWorkspacePath.some((pathEle) => pathEle === "*")) {
-				console.log("workspace path contains wildcard", workspace);
+
+			if (spiltWorkspacePath[spiltWorkspacePath.length - 1] === "*") {
+				const workspacePath = spiltWorkspacePath
+					.slice(0, spiltWorkspacePath.length - 1)
+					.join("/");
+
+				const wildcardWorkspacePath = `${path}${workspacePath}`;
+				const dirs = await readdir(wildcardWorkspacePath, {
+					recursive: false,
+				});
+
+				const dirPaths = dirs.map((dir) => `${wildcardWorkspacePath}/${dir}`);
+				validWorkspaces.push(...dirPaths);
 			} else {
-				validWorkspaces.push(workspace);
+				validWorkspaces.push(`${path}${workspace}`);
 			}
 		}
 
 		for (const workspace of validWorkspaces) {
-			await checkWorkspaceDeps(`${path}${workspace}`);
+			await checkWorkspaceDeps(workspace);
 		}
 	}
 }

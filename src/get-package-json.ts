@@ -4,7 +4,7 @@ import { isPackageJson } from "./types/package-json-type";
 const packageJSONName = "package.json";
 
 export async function getPacakgeJson(path: string) {
-	const files = await readdir(`./${path}`);
+	const files = await readdir(path);
 
 	const packjsonFile = files.find((file) => file === packageJSONName);
 
@@ -13,7 +13,7 @@ export async function getPacakgeJson(path: string) {
 		return null;
 	}
 
-	const packageJSONFile = await readFile(`${path}${packageJSONName}`, {
+	const packageJSONFile = await readFile(`${path}/${packageJSONName}`, {
 		encoding: "utf8",
 	});
 

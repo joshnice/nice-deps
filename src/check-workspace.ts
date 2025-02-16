@@ -3,7 +3,7 @@ import { getPacakgeJson } from "./get-package-json";
 import { recursiveFileSearch } from "./node-helpers/recursive-file-search";
 
 export async function checkWorkspaceDeps(workspacePath: string) {
-	const packageJson = await getPacakgeJson(`./${workspacePath}/`);
+	const packageJson = await getPacakgeJson(`${workspacePath}`);
 
 	if (packageJson == null) {
 		return;
@@ -25,8 +25,8 @@ export async function checkWorkspaceDeps(workspacePath: string) {
 	const validFiles = await recursiveFileSearch(
 		workspacePath,
 		["ts", "tsx"],
-		["node_modules", "dist"],
+		["node_modules", "dist", ".wrangler"],
 	);
 
-	console.log("validFiles", validFiles);
+	console.log("validFiles", name, validFiles);
 }
