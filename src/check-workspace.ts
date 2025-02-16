@@ -1,4 +1,5 @@
 import { readdir } from "node:fs/promises";
+import { getFileImports } from "./get-file-imports";
 import { getPacakgeJson } from "./get-package-json";
 import { recursiveFileSearch } from "./node-helpers/recursive-file-search";
 
@@ -28,5 +29,8 @@ export async function checkWorkspaceDeps(workspacePath: string) {
 		["node_modules", "dist", ".wrangler"],
 	);
 
-	console.log("validFiles", name, validFiles);
+	for (const file of validFiles) {
+		const importedPackages = await getFileImports(file);
+		console.log("file", file, importedPackages);
+	}
 }
