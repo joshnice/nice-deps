@@ -1,4 +1,28 @@
 import { readFile } from "node:fs/promises";
+import { recursiveFileSearch } from "./node-helpers/recursive-file-search";
+
+export async function getAllWorkspaceFileImportedPackages(
+	workspacePath: string,
+) {
+	const filePaths = await recursiveFileSearch(
+		workspacePath,
+		["ts", "tsx"],
+		["node_modules", "dist", ".wrangler"],
+	);
+
+	let foundPackages: string[] = [];
+	for (const filePath of filePaths) {
+		const filePackages = await getFileImports(filePath);
+		foundPackages = filePackages.reduce((packages, packageName) => {
+			// Check to see if package has already been found
+			if (!packages.includes(packageName)) {
+				packages.push(packageName);
+			}
+			return packages;
+		}, foundPackages);
+	}
+	return foundPackages;
+}
 
 /**
  * Need to handle the following:

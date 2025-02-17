@@ -1,9 +1,12 @@
 import { readdir } from "node:fs/promises";
 import {
-	generatePackageJsonDepName,
-	generatePackageNames,
+	generatePackageJsonPackageName,
+	generateWorkspaceFileImportPackageNames,
 } from "./generate-package-names";
-import { getFileImports } from "./get-file-imports";
+import {
+	getAllWorkspaceFileImportedPackages,
+	getFileImports,
+} from "./get-file-imports";
 import { getPacakgeJson } from "./get-package-json";
 import { recursiveFileSearch } from "./node-helpers/recursive-file-search";
 
@@ -14,7 +17,8 @@ export async function checkWorkspaceDeps(workspacePath: string) {
 		return;
 	}
 
-	const { name, workspaces, dependencies, devDependencies } = packageJson;
+	const { name, workspaces, dependencies, devDependencies, scripts } =
+		packageJson;
 
 	if (workspaces != null) {
 		throw new Error(
@@ -22,37 +26,34 @@ export async function checkWorkspaceDeps(workspacePath: string) {
 		);
 	}
 
-	const packageJsonDeps = [
+	const packagesInPackageJson = [
 		...Object.keys(dependencies ?? {}),
 		...Object.keys(devDependencies ?? {}),
 	];
 
-	const validFiles = await recursiveFileSearch(
-		workspacePath,
-		["ts", "tsx"],
-		["node_modules", "dist", ".wrangler"],
-	);
+	const workspacePackages =
+		await getAllWorkspaceFileImportedPackages(workspacePath);
 
-	const usedPackages: string[] = [];
-
-	for (const file of validFiles) {
-		const importedPackages = await getFileImports(file);
-		// biome-ignore lint/complexity/noForEach: <explanation>
-		importedPackages.forEach((packageName) => {
-			if (!usedPackages.includes(packageName)) {
-				usedPackages.push(packageName);
-			}
-		});
-	}
-
-	const missingPackages = packageJsonDeps.filter(
-		(packageJsonDep) =>
-			!usedPackages.some((usedPackage) => {
-				return generatePackageNames(usedPackage).some((name) =>
-					generatePackageJsonDepName(packageJsonDep).includes(name),
+	const missingPackagesFromFileImports = packagesInPackageJson.filter(
+		(packageInPackageJson) =>
+			!workspacePackages.some((workspacePackage) => {
+				return generateWorkspaceFileImportPackageNames(workspacePackage).some(
+					(name) =>
+						generatePackageJsonPackageName(packageInPackageJson).includes(name),
 				);
 			}),
 	);
 
-	console.log(name, missingPackages);
+	// Check package.json scripts
+	const allScriptStrings = Object.values(scripts ?? {})
+		.join(" ")
+		.split(" ")
+		.map((scriptString) => scriptString.replace('"', ""));
+
+	const missingPacakgesFromPackageJsonScripts =
+		missingPackagesFromFileImports.filter(
+			(packageName) => !allScriptStrings.includes(packageName),
+		);
+
+	console.log("missingPackages", name, missingPacakgesFromPackageJsonScripts);
 }

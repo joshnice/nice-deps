@@ -1,6 +1,7 @@
 export interface PackageJson {
 	name: string;
 	workspaces?: string[];
+	scripts?: Record<string, string>;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
 }
@@ -20,8 +21,9 @@ export function isPackageJson(data: any): data is PackageJson {
 	const deps = data.dependencies == null || depValidation(data.dependencies);
 	const devDeps =
 		data.devDependencies == null || depValidation(data.devDependencies);
+	const scripts = data.scripts == null || depValidation(data.scripts);
 
-	return name && workspaces && deps && devDeps;
+	return name && workspaces && deps && devDeps && scripts;
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>

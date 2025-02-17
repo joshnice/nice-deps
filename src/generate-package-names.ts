@@ -2,7 +2,7 @@
  * @param packageName - "@upstash/redis/cloudflare"
  * @returns ["@upstash", "@upstash/redis", "@upstash/redis/cloudflare"]
  */
-export function generatePackageNames(packageName: string) {
+export function generateWorkspaceFileImportPackageNames(packageName: string) {
 	const packageNameSpilt = packageName.split("/");
 	const numberOfSlashes = packageNameSpilt.length;
 	const names: string[] = [];
@@ -14,7 +14,7 @@ export function generatePackageNames(packageName: string) {
 	return names;
 }
 
-export function generatePackageJsonDepName(packageJsonDep: string) {
+export function generatePackageJsonPackageName(packageJsonDep: string) {
 	const names = [packageJsonDep.toLowerCase()];
 
 	if (packageJsonDep.includes("@types/")) {
