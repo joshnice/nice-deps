@@ -26,10 +26,17 @@ export async function getFileImports(filePath: string) {
 			const startOfLine = trimmedLine.slice(0, 7);
 			if (startOfLine === "import ") {
 				importStatement = true;
-				// Check if the import finishes on that line
-				const doesLineContainFrom = trimmedLine.includes(" from ");
-				const doesLineContainClosingImport = trimmedLine.includes("} ");
-				if (doesLineContainFrom && doesLineContainClosingImport) {
+				const doesLineContainFromWithSingleQuote =
+					trimmedLine.includes(" from '");
+				const doesLineContainFromWithDoubleQuote =
+					trimmedLine.includes(' from "');
+				const doesLineContainFromWithBackTick = trimmedLine.includes(" from `");
+
+				if (
+					doesLineContainFromWithSingleQuote ||
+					doesLineContainFromWithDoubleQuote ||
+					doesLineContainFromWithBackTick
+				) {
 					const importName = getImportName(trimmedLine);
 					if (importName != null) {
 						importedPackages.push(importName);
