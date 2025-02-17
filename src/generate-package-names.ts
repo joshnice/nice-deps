@@ -9,7 +9,17 @@ export function generatePackageNames(packageName: string) {
 	for (let index = 0; index < numberOfSlashes; index += 1) {
 		const name = packageNameSpilt.slice(0, index + 1);
 		const joinedName = name.join("/");
-		names.push(joinedName);
+		names.push(joinedName.toLowerCase());
 	}
+	return names;
+}
+
+export function generatePackageJsonDepName(packageJsonDep: string) {
+	const names = [packageJsonDep.toLowerCase()];
+
+	if (packageJsonDep.includes("@types/")) {
+		names.push(packageJsonDep.replace("@types/", "").toLowerCase());
+	}
+
 	return names;
 }

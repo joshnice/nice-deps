@@ -1,5 +1,8 @@
 import { readdir } from "node:fs/promises";
-import { generatePackageNames } from "./generate-package-names";
+import {
+	generatePackageJsonDepName,
+	generatePackageNames,
+} from "./generate-package-names";
 import { getFileImports } from "./get-file-imports";
 import { getPacakgeJson } from "./get-package-json";
 import { recursiveFileSearch } from "./node-helpers/recursive-file-search";
@@ -44,11 +47,11 @@ export async function checkWorkspaceDeps(workspacePath: string) {
 
 	const missingPackages = packageJsonDeps.filter(
 		(packageJsonDep) =>
-			!usedPackages.some((usedPackage) =>
-				generatePackageNames(usedPackage).some(
-					(name) => name === packageJsonDep,
-				),
-			),
+			!usedPackages.some((usedPackage) => {
+				return generatePackageNames(usedPackage).some((name) =>
+					generatePackageJsonDepName(packageJsonDep).includes(name),
+				);
+			}),
 	);
 
 	console.log(name, missingPackages);

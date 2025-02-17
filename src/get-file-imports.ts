@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 /**
  * Need to handle the following:
  * - import * as Sentry from "@sentry/react";
+ * - import Gist from "super-react-gist";
  */
 export async function getFileImports(filePath: string) {
 	const file = await readFile(filePath, { encoding: "utf8" });
